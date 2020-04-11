@@ -21,7 +21,7 @@ public class GameApi {
     @POST
     @Path("/player")
     public Player createNewPlayer() {
-
+        return playerService.newPlayer();
     }
 
     @GET
