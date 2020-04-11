@@ -17,8 +17,8 @@ public class PlayerApi {
     @Inject
     PlayerService playerService;
 
-    @POST
-    @Path("/player")
+    @GET
+    @Path("/player/new")
     public Player createNewPlayer() {
         return playerService.createNewPlayer();
     }

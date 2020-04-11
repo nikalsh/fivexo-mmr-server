@@ -1,11 +1,14 @@
 package mmr.server.service;
 
+import mmr.server.utils.PlayerExperienceComparator;
 import mmr.server.model.Player;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
+import javax.enterprise.context.ApplicationScoped;
+import java.util.Collections;
 import java.util.List;
 
+@ApplicationScoped
 public class PlayerService {
 
     public Player createNewPlayer() {
@@ -35,11 +38,21 @@ public class PlayerService {
 
     public List<Player> findAllPlayers() {
         List<Player> list = Player.findAll().list();
-        anonymizeIds(list);
-//        sortByWinPercentage(list);
-//        sortByLevel(list);
+        hideIds(list);
+        sortByExperience(list);
         return list;
     }
+
+    private List<Player> hideIds(List<Player> list) {
+        list.stream().forEach(e -> e.id = null);
+        return list;
+    }
+
+    private void sortByExperience(List<Player> list) {
+        Collections.sort(list, new PlayerExperienceComparator());
+        Collections.reverse(list);
+    }
+
 
 //    public List<Player> findPlayersByPageIndex() {
 //        List<Player> list = Player.findAll().list();
@@ -47,10 +60,7 @@ public class PlayerService {
 //        return list;
 //    }
 
-    private List<Player> anonymizeIds(List<Player> list) {
-        list.stream().forEach(e -> e.id = null);
-        return list;
-    }
+
 
 
 }
