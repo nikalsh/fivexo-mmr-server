@@ -1,4 +1,4 @@
-package org.acme.getting.started;
+package mmr.server;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -9,13 +9,13 @@ import static org.hamcrest.CoreMatchers.is;
 @QuarkusTest
 public class GreetingResourceTest {
 
-    @Test
-    public void testHelloEndpoint() {
-        given()
-          .when().get("/hello")
-          .then()
-             .statusCode(200)
-             .body(is("hello"));
-    }
+//    @Test
+//    public void testHelloEndpoint() {
+//        given()
+//          .when().get("/hello")
+//          .then()
+//             .statusCode(200)
+//             .body(is("hello"));
+//    }
 
 }

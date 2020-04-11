@@ -1,4 +1,4 @@
-package org.acme.getting.started;
+package mmr.server;
 
 import io.quarkus.test.junit.NativeImageTest;
 
