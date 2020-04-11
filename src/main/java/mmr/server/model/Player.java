@@ -10,7 +10,7 @@ import org.bson.types.ObjectId;
 public class Player extends PanacheMongoEntityBase {
 
     @BsonId
-    public ObjectId playerId;
+    public ObjectId id;
     public int wins = 0;
     public int losses = 0;
     public int ties = 0;
