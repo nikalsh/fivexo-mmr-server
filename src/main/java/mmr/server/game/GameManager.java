@@ -11,8 +11,11 @@ public class GameManager {
     private String[] turnKeeper = new String[]{X, O};
     private int turn = 0;
 
-    private GameManager() {
+    public GameManager() {
+    }
 
+    public FiveInARowPlayer[] getPlayers() {
+        return players;
     }
 
     public FiveInARowState newGame(String playerOneId, String playerTwoId) {

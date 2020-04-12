@@ -1,5 +1,9 @@
 package mmr.server.game;
 
+import javax.json.Json;
+import java.io.StringWriter;
+import java.util.Arrays;
+
 public class FiveInARowState {
     private String[][] grid;
     private boolean gameOver = false;
@@ -27,5 +31,14 @@ public class FiveInARowState {
 
     public String getWinnerCharacter() {
         return winnerCharacter;
+    }
+
+    @Override
+    public String toString() {
+        return "FiveInARowState{" +
+                "grid=" + Arrays.toString(grid) +
+                ", gameOver=" + gameOver +
+                ", winnerCharacter='" + winnerCharacter + '\'' +
+                '}';
     }
 }
