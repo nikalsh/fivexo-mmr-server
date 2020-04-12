@@ -6,7 +6,7 @@ import io.quarkus.mongodb.panache.PanacheMongoEntityBase;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.types.ObjectId;
 
-@MongoEntity(collection = "Players")
+@MongoEntity(collection = "Player")
 public class Player extends PanacheMongoEntityBase {
 
     @BsonId
