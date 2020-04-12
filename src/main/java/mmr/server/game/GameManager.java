@@ -1,5 +1,8 @@
 package mmr.server.game;
 
+import mmr.server.game.exception.GameOverException;
+import mmr.server.game.exception.PlayerTurnException;
+
 public class GameManager {
     private static final String X = "X";
     private static final String O = "O";
@@ -27,13 +30,11 @@ public class GameManager {
 
     public FiveInARowState place(FiveInARowPlayer player, int x, int y) {
         if (!player.equals(players[turn])) {
-            //add exception
-            return null;
+            throw new PlayerTurnException("Player cannot take turn in another players' turn");
         }
 
         if (game.isGameOver()) {
-            //add exception
-            return null;
+            throw new GameOverException("Game is over, no more turns can be taken");
         }
 
         game.place(x, y, player.getCharacter());

@@ -1,4 +1,4 @@
-package mmr.server.game;
+package mmr.server;
 
 import mmr.ExperienceCalculator;
 import mmr.exception.LevelNotFoundException;
