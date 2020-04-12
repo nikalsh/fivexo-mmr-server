@@ -12,11 +12,12 @@ public class GameManager {
 
     }
 
-    public void newGame(String playerOneId, String playerTwoId) {
+    public FiveInARowState newGame(String playerOneId, String playerTwoId) {
         game = new FiveInARow();
         players = new FiveInARowPlayer[]{
                 new FiveInARowPlayer(playerOneId, X),
                 new FiveInARowPlayer(playerTwoId, O)};
+        return FiveInARowState.of(this.game);
     }
 
     public FiveInARowPlayer nextTurn() {
@@ -38,11 +39,11 @@ public class GameManager {
         game.place(x, y, player.getCharacter());
 
         if (game.isGameOver()) {
-            return FiveInARowState.of(game);
+            return FiveInARowState.of(this.game);
         }
 
         turn++;
-        return FiveInARowState.of(game);
+        return FiveInARowState.of(this.game);
     }
 
 

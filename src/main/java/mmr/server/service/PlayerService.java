@@ -28,10 +28,10 @@ public class PlayerService {
     public Player updateName(String id, String name) {
         Player player = findById(id);
         player.name = name;
-        return updatePlayer(player);
+        return update(player);
     }
 
-    private Player updatePlayer(Player player) {
+    public Player update(Player player) {
         Player.update(player);
         return Player.findById(player.id);
     }
