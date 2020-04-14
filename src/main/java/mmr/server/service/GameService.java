@@ -3,6 +3,9 @@ package mmr.server.service;
 import mmr.server.model.Game;
 import org.bson.types.ObjectId;
 
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
 public class GameService {
 
     public Game create(String player1Id, String player2Id) {

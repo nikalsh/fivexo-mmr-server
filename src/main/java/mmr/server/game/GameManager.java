@@ -10,6 +10,7 @@ public class GameManager {
     private FiveInARow game;
     private String[] turnKeeper = new String[]{X, O};
     private int turn = 0;
+    private int totalTurns = 0;
 
     public GameManager() {
     }
@@ -31,7 +32,11 @@ public class GameManager {
         return players[turn];
     }
 
-    public FiveInARowState place(FiveInARowPlayer player, int x, int y) {
+    public FiveInARowState init() {
+        return FiveInARowState.of(this.game);
+    }
+
+    public FiveInARowState place(FiveInARowPlayer player, int y, int x) {
         if (!player.equals(players[turn])) {
             throw new PlayerTurnException("Player cannot take turn in another players' turn");
         }
@@ -40,15 +45,18 @@ public class GameManager {
             throw new GameOverException("Game is over, no more turns can be taken");
         }
 
-        game.place(x, y, player.getCharacter());
+        game.place(y, x, player.getCharacter());
 
         if (game.isGameOver()) {
             return FiveInARowState.of(this.game);
         }
 
         turn++;
+        totalTurns++;
         return FiveInARowState.of(this.game);
     }
 
-
+    public String getTurn() {
+        return players[turn % 2].getCharacter();
+    }
 }

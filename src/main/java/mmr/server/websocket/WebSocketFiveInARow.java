@@ -4,7 +4,7 @@ import mmr.server.game.FiveInARowState;
 import mmr.server.game.GameManager;
 import mmr.server.model.Game;
 import mmr.server.service.GameService;
-import mmr.server.websocket.encoders.FiveInARowStateEncoder;
+import mmr.server.websocket.encoders.ObjectToJson;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,6 +31,9 @@ public class WebSocketFiveInARow {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("gameId") String gameId, @PathParam("playerId") String playerId) {
+        System.out.println(gameId);
+        System.out.println(playerId);
+        System.out.println("game open");
         Game game = gameService.findById(gameId);
         if (game == null) {
             return;
@@ -41,33 +44,42 @@ public class WebSocketFiveInARow {
             gameManagers.put(gameId, gameManager);
         }
         sessions.put(playerId, session);
-        sendToSession(sessions.get(playerId),
-                Arrays.stream(gameManagers.get(gameId).getPlayers())
-                        .filter(e -> e.getId().equals(playerId))
-                        .findFirst()
-                        .get()
-                        .getCharacter());
+
+        String turn = gameManagers.get(gameId).getTurn();
+
+        String character = Arrays.stream(gameManagers.get(gameId).getPlayers())
+                .filter(e -> e.getId().equals(playerId))
+                .findFirst()
+                .get()
+                .getCharacter();
+
+        CharacterTurnObject characterTurnObject = new CharacterTurnObject(character, turn);
+
+        sendToSession(sessions.get(playerId), ObjectToJson.toJson(characterTurnObject));
+
 //        sendToSession(session, "Connected to websocket successfully");
     }
 
     @OnMessage
     public void message(String coords, @PathParam("gameId") String gameId, @PathParam("playerId") String playerId) {
-        Integer x = Integer.valueOf(coords.split(" ")[0]);
-        Integer y = Integer.valueOf(coords.split(" ")[1]);
+        Integer y = Integer.valueOf(coords.split(" ")[0]);
+        Integer x = Integer.valueOf(coords.split(" ")[1]);
 
         GameManager gameManager = gameManagers.get(gameId);
 
         if (gameManager.nextTurn().getId().equals(playerId)) {
-            FiveInARowState fiveInARowState = gameManager.place(Arrays.stream(gameManager.getPlayers()).filter(e -> e.getId().equals(playerId)).findFirst().get(), x, y);
-            sendToSession(sessions.get(gameManager.getPlayers()[0].getId()), FiveInARowStateEncoder.toJson(fiveInARowState));
-            sendToSession(sessions.get(gameManager.getPlayers()[1].getId()), FiveInARowStateEncoder.toJson(fiveInARowState));
+            FiveInARowState fiveInARowState = gameManager.place(Arrays.stream(gameManager.getPlayers()).filter(e -> e.getId().equals(playerId)).findFirst().get(), y, x);
+            System.out.println(fiveInARowState);
+            fiveInARowState.setTurn(gameManagers.get(gameId).getTurn());
+            sendToSession(sessions.get(gameManager.getPlayers()[0].getId()), ObjectToJson.toJson(fiveInARowState));
+            sendToSession(sessions.get(gameManager.getPlayers()[1].getId()), ObjectToJson.toJson(fiveInARowState));
         }
 
 
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("id") String id) throws IOException {
+    public void onClose(Session session, @PathParam("playerId") String id) throws IOException {
         sessions.get(id).close();
         sessions.remove(id);
     }

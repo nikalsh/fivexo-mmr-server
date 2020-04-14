@@ -1,12 +1,10 @@
 package mmr.server.websocket;
 
-import mmr.server.game.FiveInARow;
-import mmr.server.game.GameManager;
 import mmr.server.model.Game;
 import mmr.server.model.Player;
 import mmr.server.service.GameService;
 import mmr.server.service.PlayerService;
-import mmr.server.websocket.exception.AlreadyInGameException;
+import mmr.server.websocket.encoders.ObjectToJson;
 import mmr.server.websocket.exception.AlreadyQueuedException;
 
 import javax.annotation.PostConstruct;
@@ -35,72 +33,81 @@ public class WebSocketMatchmakingQueue {
     @Inject
     GameService gameService;
 
-    ExecutorService executorService;
     Map<String, Session> sessions = new ConcurrentHashMap<>();
     Queue<Player> matchmakingQueue = new LinkedList<>();
-    Map<String, GameManager> games = new ConcurrentHashMap<>();
+//    Map<String, GameManager> games = new ConcurrentHashMap<>();
+
+    private ExecutorService executors;
 
     @PostConstruct
     public void init() {
-        ExecutorService executor = Executors.newFixedThreadPool(100);
+         executors = Executors.newFixedThreadPool(100);
     }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) {
+        session.setMaxIdleTimeout(300000L);
         sessions.put(id, session);
+        sendToSession(sessions.get(id), "websocket opened");
     }
 
     @OnClose
     public void onClose(Session session, @PathParam("id") String id) throws IOException {
-        sessions.get(id).close();
+        matchmakingQueue.remove(matchmakingQueue.stream().filter(e -> e.id.equals(id)).findFirst().get());
         sessions.remove(id);
     }
 
     @OnMessage
-    public void message(String message, @PathParam("id") String id) {
+    public void asd(String message, @PathParam("id") String id) {
+        System.out.println(message);
+
+        sendToSession(sessions.get(id), "queued");
 
         switch (message) {
-            case "play":
-                executorService.execute(() -> {
+            case "queue":
+                executors.execute(() -> {
                     boolean waiting = true;
                     boolean alreadyQueued = matchmakingQueue.stream().filter(e -> e.id.toString().equals(id)).findFirst().isPresent();
-                    boolean alreadyInGame = games.containsKey(id);
+//                    boolean alreadyInGame = games.containsKey(id);
+
                     if (alreadyQueued) {
                         sendToSession(sessions.get(id), "Already queued for a game");
                         throw new AlreadyQueuedException("Already queued for a game");
                     }
 
-                    if (alreadyInGame) {
-                        sendToSession(sessions.get(id), "Already in a game");
-                        throw new AlreadyInGameException("Already in a game");
-                    }
+//                    if (alreadyInGame) {
+//                        sendToSession(sessions.get(id), "Already in a game");
+//                        throw new AlreadyInGameException("Already in a game");
+//                    }
+
+                System.out.println(id);
 
                     matchmakingQueue.add(playerService.findById(id));
                     sendToSession(sessions.get(id), "Queued for a game");
                     //waiting for other player
 
-                    while (waiting) {
+                System.out.println(matchmakingQueue);
+
+                while (waiting) {
                         if (matchmakingQueue.size() >= 2) {
                             Player player1 = matchmakingQueue.stream().filter(e -> e.id.toString().equals(id)).findFirst().get();
                             matchmakingQueue.remove(player1);
                             Player player2 = matchmakingQueue.poll();
-//                            GameManager gameManager = new GameManager();
-//                            games.put(player1.id.toString(), gameManager);
-//                            games.put(player2.id.toString(), gameManager);
-//                            gameManager.newGame(player1.id.toString(), player2.id.toString());
+
                             Game game = gameService.create(player1.id.toString(), player2.id.toString());
                             System.out.println(player1);
                             System.out.println(player2);
+
+                            sendToSession(sessions.get(player1.id.toString()), ObjectToJson.toJson(new MatchmakingObject(game.id.toString(), true)));
+                            sendToSession(sessions.get(player2.id.toString()), ObjectToJson.toJson(new MatchmakingObject(game.id.toString(), true)));
+
                             waiting = false;
-                            sendToSession(sessions.get(player1.id.toString()), game.id.toString());
-                            sendToSession(sessions.get(player2.id.toString()), game.id.toString());
+
                         }
                     }
 
                 });
-
-                break;
-            case "turn":
+//                System.out.println(matchmakingQueue);
 
         }
 

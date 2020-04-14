@@ -26,6 +26,9 @@ public class PlayerService {
     }
 
     public Player updateName(String id, String name) {
+        if (name.length() > 20) {
+        name = name.substring(0, 20);
+        }
         Player player = findById(id);
         player.name = name;
         return update(player);

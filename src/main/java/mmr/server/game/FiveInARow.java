@@ -19,6 +19,11 @@ public class FiveInARow {
 
     public FiveInARow() {
         this.grid = new String[X_DEFAULT][Y_DEFAULT];
+        for (int i = 0; i < X_DEFAULT; i++) {
+            for (int j = 0; j < Y_DEFAULT; j++){
+                grid[i][j] = "";
+            }
+        }
     }
 
     public boolean isGameOver() {
@@ -29,20 +34,20 @@ public class FiveInARow {
         return winnerCharacter;
     }
 
-    public boolean canPlace(int x, int y) {
-        return isInBounds(x, y) && grid[x][y].isEmpty();
+    public boolean canPlace(int y, int x) {
+        return isInBounds(x, y) && grid[y][x].isEmpty();
     }
 
-    private boolean isInBounds(int x, int y) {
+    private boolean isInBounds(int y, int x) {
         return x >= 0 && x < X_DEFAULT && y >= 0 && y < Y_DEFAULT;
     }
 
-    public boolean place(int x, int y, String XO) {
-        if (canPlace(x, y)) {
-            this.grid[x][y] = XO;
+    public boolean place(int y, int x, String XO) {
+        if (canPlace(y, x)) {
+            this.grid[y][x] = XO;
 
             for (Delta delta : Deltas) {
-                gameOver = checkWin(XO, x, y, delta.x, delta.y);
+                gameOver = checkWin(XO, y, x, delta.x, delta.y);
                 if (gameOver) {
                     break;
                 }
@@ -56,11 +61,11 @@ public class FiveInARow {
     }
 
 
-    private boolean checkWin(String XO, int x, int y, int deltaX, int deltaY) {
+    private boolean checkWin(String XO, int y, int x, int deltaY, int deltaX) {
         boolean win = true;
         for (int count = 0; count < 5; count++) {
-            if (isInBounds(x, y)) {
-                String test = grid[x][y];
+            if (isInBounds(y, x)) {
+                String test = grid[y][x];
                 if (test != XO) {
                     win = false;
                     break;

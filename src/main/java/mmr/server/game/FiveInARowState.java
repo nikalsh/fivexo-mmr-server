@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 public class FiveInARowState {
     private String[][] grid;
+    private String turn;
     private boolean gameOver = false;
     private String winnerCharacter;
 
@@ -19,6 +20,14 @@ public class FiveInARowState {
         return new FiveInARowState(fiveInARow);
     }
 
+
+    public String getTurn() {
+        return turn;
+    }
+
+    public void setTurn(String turn) {
+        this.turn = turn;
+    }
 
     public String[][] getGrid() {
         return grid;

@@ -26,7 +26,11 @@ public class Player extends PanacheMongoEntityBase {
         return "Player{" +
                 "wins=" + wins +
                 ", losses=" + losses +
+                ", ties=" + ties +
                 ", experience=" + experience +
+                ", name= " + name +
+                ", level= " + level +
+                ", id= " + id.toString() +
                 '}';
     }
 

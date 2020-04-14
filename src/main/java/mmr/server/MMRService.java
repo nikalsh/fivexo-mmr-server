@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import java.util.List;
 
 @ApplicationScoped
-public class MMRManager {
+public class MMRService {
 
     @Inject
     PlayerService playerService;
