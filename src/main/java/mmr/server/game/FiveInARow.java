@@ -47,14 +47,11 @@ public class FiveInARow {
             this.grid[y][x] = XO;
 
             for (Delta delta : Deltas) {
-                gameOver = checkWin(XO, y, x, delta.x, delta.y);
+                gameOver = checkWin(XO, y, x, delta.y, delta.x);
                 if (gameOver) {
+                    winnerCharacter = XO;
                     break;
                 }
-            }
-
-            if (gameOver) {
-                winnerCharacter = XO;
             }
         }
         return gameOver;
@@ -63,7 +60,7 @@ public class FiveInARow {
 
     private boolean checkWin(String XO, int y, int x, int deltaY, int deltaX) {
         boolean win = true;
-        for (int count = 0; count < 5; count++) {
+        for (int count = 1; count <= 5; count++) {
             if (isInBounds(y, x)) {
                 String test = grid[y][x];
                 if (test != XO) {
