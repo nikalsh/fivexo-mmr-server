@@ -1,0 +1,1 @@
+web: java -Dquarkus.http.port=$PORT -Dquarkus.profile=prod -jar target/getting-started-1.0-SNAPSHOT-runner.jar
