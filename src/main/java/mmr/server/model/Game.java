@@ -12,11 +12,11 @@ public class Game extends PanacheMongoEntityBase {
 
     @BsonId
     public ObjectId id;
-    public String winnerId;
-    public String loserId;
-    public Integer turns;
-    public String player1;
-    public String player2;
+    public String winnerId = "";
+    public String loserId = "";
+    public Integer turns = 0;
+    public String player1 = "";
+    public String player2 = "";
     public Integer initiated = 0;
 
     public Game() {
