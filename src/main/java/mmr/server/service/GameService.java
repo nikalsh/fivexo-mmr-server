@@ -28,7 +28,4 @@ public class GameService {
         Game.update(game);
         return Game.findById(game.id);
     }
-
-
-
 }

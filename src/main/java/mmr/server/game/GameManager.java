@@ -3,10 +3,14 @@ package mmr.server.game;
 import mmr.server.game.exception.GameOverException;
 import mmr.server.game.exception.PlayerTurnException;
 
+import java.util.Arrays;
+
 public class GameManager {
     private static final String X = "X";
     private static final String O = "O";
     private FiveInARowPlayer[] players;
+    private FiveInARowPlayer winningPlayer;
+    private FiveInARowPlayer losingPlayer;
     private FiveInARow game;
     private String[] turnKeeper = new String[]{X, O};
     private int turn = 0;
@@ -48,6 +52,8 @@ public class GameManager {
         game.place(y, x, player.getCharacter());
 
         if (game.isGameOver()) {
+            setWinningPlayer(player);
+            setLosingPlayer(Arrays.stream(players).filter(e -> !e.equals(player)).findFirst().get());
             return FiveInARowState.of(this.game);
         }
 
@@ -56,9 +62,42 @@ public class GameManager {
         return FiveInARowState.of(this.game);
     }
 
-    public boolean gameIsOver() { return this.game.isGameOver(); }
+    public boolean gameIsOver() {
+        return this.game.isGameOver();
+    }
 
     public String getTurn() {
         return players[turn % 2].getCharacter();
+    }
+
+    @Override
+    public String toString() {
+        return "GameManager{" +
+                "players=" + Arrays.toString(players) +
+                ", game=" + game +
+                ", turnKeeper=" + Arrays.toString(turnKeeper) +
+                ", turn=" + turn +
+                ", totalTurns=" + totalTurns +
+                '}';
+    }
+
+    public FiveInARowPlayer getWinningPlayer() {
+        return winningPlayer;
+    }
+
+    private void setWinningPlayer(FiveInARowPlayer winningPlayer) {
+        this.winningPlayer = winningPlayer;
+    }
+
+    public FiveInARowPlayer getLosingPlayer() {
+        return losingPlayer;
+    }
+
+    private void setLosingPlayer(FiveInARowPlayer losingPlayer) {
+        this.losingPlayer = losingPlayer;
+    }
+
+    public int getTotalTurns() {
+        return totalTurns;
     }
 }

@@ -15,18 +15,17 @@ import java.util.concurrent.*;
 @ApplicationScoped
 public class MatchmakingQueue {
 
-
     @Inject
     GameService gameService;
-
+    //keeps track of clients waiting to be added to a gamelobby, produces gamelobbies
     private BlockingDeque<String> queue = new LinkedBlockingDeque<>();
+    //gamelobby acts as a waiting room for clients, consumes clients and produces games
     private BlockingDeque<GameLobby> gameQueue = new LinkedBlockingDeque<>();
+    //gamelist are actual games, consumes a gamelobby when it's full
     private List<Game> gameList = Collections.synchronizedList(new ArrayList<>());
     private static final ExecutorService executors = Executors.newFixedThreadPool(50);
 
-    public MatchmakingQueue() {
-
-    }
+    public MatchmakingQueue() { }
 
     @PostConstruct
     public void init() {
@@ -45,7 +44,6 @@ public class MatchmakingQueue {
                 }
 
                 GameLobby gameLobby = nextGameOrNull();
-
                 //is there anyone in queue?
                 if (!queue.isEmpty()) {
                     String client = nextClientOrNull();
@@ -57,7 +55,6 @@ public class MatchmakingQueue {
                             gameLobby.addClient(client);
                             gameQueue.add(gameLobby);
                         } else {
-
                             if (!gameLobby.addClient(client)) {
                                 //gamelobby is full and client could not be added, create a new gamelobby and add client
                                 GameLobby newGame = new GameLobby();
@@ -68,24 +65,23 @@ public class MatchmakingQueue {
                             }
                         }
                     }
-
                 } else if (gameLobby != null && gameLobby.getClients().size() < 2) {
                     //re-add the gamelobby to the queue when no new client was added
                     gameQueue.add(gameLobby);
                 }
-
                 if (gameLobby != null) {
                     if (gameLobby.clients() == 2) {
-                        //the gamelobby is full, no need to re-add it to the gameQueue
+                        //the gamelobby is full, dont re-add it to the gameQueue
+                        // create a game and add both clients from the lobby
                         Game game = gameService.create(gameLobby.getClients().get(0), gameLobby.getClients().get(1));
                         synchronized (gameList) {
                             gameList.add(game);
                         }
                     }
                 }
-                System.out.format("ClientQueue %s%n", queue);
-                System.out.format("GameQueue: %s%n", gameQueue);
-                System.out.format("GameList: %s%n", gameList);
+//                System.out.format("ClientQueue %s%n", queue);
+//                System.out.format("GameQueue: %s%n", gameQueue);
+//                System.out.format("GameList: %s%n", gameList);
             }
         });
     }

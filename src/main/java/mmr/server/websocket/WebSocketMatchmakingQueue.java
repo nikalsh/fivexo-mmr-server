@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @ServerEndpoint("/queue/{id}")
 @ApplicationScoped
@@ -60,13 +57,14 @@ public class WebSocketMatchmakingQueue {
 
         sendToSession(sessions.get(id), "queued");
 
-        switch (message) {
+            switch (message) {
             case "queue":
                 executors.execute(() -> {
-                    //blocking
                     MatchmakingObject matchmakingObject = null;
                     try {
-                        matchmakingObject = matchmakingQueue.addClient(id).get();
+                        CompletableFuture<MatchmakingObject> matchmakingObjectCompletableFuture = matchmakingQueue.addClient(id);
+                        //blocking until the future resolves
+                        matchmakingObject = matchmakingObjectCompletableFuture.get();
                         System.out.println(matchmakingObject);
                         sendToSession(sessions.get(id), ObjectToJson.toJson(matchmakingObject));
                     } catch (InterruptedException e) {
