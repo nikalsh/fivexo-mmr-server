@@ -17,6 +17,7 @@ public class Game extends PanacheMongoEntityBase {
     public Integer turns;
     public String player1;
     public String player2;
+    public Integer initiated = 0;
 
     public Game() {
     }
@@ -31,12 +32,13 @@ public class Game extends PanacheMongoEntityBase {
                 Objects.equals(loserId, game.loserId) &&
                 Objects.equals(turns, game.turns) &&
                 Objects.equals(player1, game.player1) &&
-                Objects.equals(player2, game.player2);
+                Objects.equals(player2, game.player2) &&
+                Objects.equals(initiated, game.initiated);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, winnerId, loserId, turns, player1, player2);
+        return Objects.hash(id, winnerId, loserId, turns, player1, player2, initiated);
     }
 
     @Override

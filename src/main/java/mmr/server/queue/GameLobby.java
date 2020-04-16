@@ -14,7 +14,6 @@ public class GameLobby {
     }
 
     public boolean addClient(String id) {
-
         if (clients.size() >= 2) {
             return false;
         }

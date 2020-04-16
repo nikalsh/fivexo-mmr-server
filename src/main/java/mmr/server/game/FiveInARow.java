@@ -17,14 +17,10 @@ public class FiveInARow {
             new Delta(0, -1),
     };
 
-    protected void setGrid(String[][] grid) {
-        this.grid = grid;
-    }
-
     public FiveInARow() {
-        this.grid = new String[X_DEFAULT][Y_DEFAULT];
+        this.grid = new String[Y_DEFAULT][X_DEFAULT];
         for (int i = 0; i < X_DEFAULT; i++) {
-            for (int j = 0; j < Y_DEFAULT; j++){
+            for (int j = 0; j < Y_DEFAULT; j++) {
                 grid[i][j] = "";
             }
         }
@@ -80,6 +76,10 @@ public class FiveInARow {
 
     public String[][] getGrid() {
         return grid;
+    }
+
+    protected void setGrid(String[][] grid) {
+        this.grid = grid;
     }
 
     public class Delta {

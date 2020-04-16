@@ -7,25 +7,22 @@ import mmr.server.websocket.MatchmakingObject;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
-//@Startup
 @ApplicationScoped
 public class MatchmakingQueue {
 
-    private static final ExecutorService executors = Executors.newFixedThreadPool(50);
 
     @Inject
     GameService gameService;
 
     private BlockingDeque<String> queue = new LinkedBlockingDeque<>();
     private BlockingDeque<GameLobby> gameQueue = new LinkedBlockingDeque<>();
-
     private List<Game> gameList = Collections.synchronizedList(new ArrayList<>());
+    private static final ExecutorService executors = Executors.newFixedThreadPool(50);
 
     public MatchmakingQueue() {
 
@@ -36,23 +33,13 @@ public class MatchmakingQueue {
         startQueue();
     }
 
-    public void purge(String gameId) {
-        synchronized (gameList) {
-            Game game = gameList.stream().filter(e -> e.id.toString().equals(gameId)).findFirst().orElse(null);
-            if (game != null) {
-                gameList.remove(game);
-            }
-        }
-    }
-
-    public void startQueue() {
+    private void startQueue() {
         executors.execute(() -> {
             while (true) {
 
                 try {
                     Thread.sleep(1000);
 //                    System.out.println(LocalDateTime.now() + " " + Thread.currentThread().getName());
-
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -61,27 +48,29 @@ public class MatchmakingQueue {
 
                 //is there anyone in queue?
                 if (!queue.isEmpty()) {
-                    String client1 = nextClientOrNull();
-                    if (client1 != null) {
-                        if (gameLobby == null) {
-                            //no rooms available, create new game
-                            gameLobby = new GameLobby();
-                            gameLobby.addClient(client1);
-                            gameQueue.add(gameLobby);
+                    String client = nextClientOrNull();
+                    if (client != null) {
 
+                        if (gameLobby == null) {
+                            //no gamelobbies available, create new gamelobby
+                            gameLobby = new GameLobby();
+                            gameLobby.addClient(client);
+                            gameQueue.add(gameLobby);
                         } else {
-                            if (!gameLobby.addClient(client1)) {
-                                //game is full and client could not be added, create a new game
+
+                            if (!gameLobby.addClient(client)) {
+                                //gamelobby is full and client could not be added, create a new gamelobby and add client
                                 GameLobby newGame = new GameLobby();
-                                if (newGame.addClient(client1)) {
+                                if (newGame.addClient(client)) {
                                     //wait for next loop to add next client
                                     gameQueue.add(newGame);
                                 }
                             }
                         }
                     }
+
                 } else if (gameLobby != null && gameLobby.getClients().size() < 2) {
-                    //re-add the gamelobby when no new client was added
+                    //re-add the gamelobby to the queue when no new client was added
                     gameQueue.add(gameLobby);
                 }
 
@@ -115,10 +104,6 @@ public class MatchmakingQueue {
         return gameQueue.pollFirst();
     }
 
-    @Override
-    public String toString() {
-        return queue.toString();
-    }
 
     public CompletableFuture<MatchmakingObject> addClient(String id) {
         queue.add(id);
@@ -142,6 +127,11 @@ public class MatchmakingQueue {
                             .orElse(null);
 
                     if (game != null) {
+                        //only remove the game from list when its matchmakingobject has been initiated for both players
+                        game.initiated++;
+                        if (game.initiated == 2) {
+                            removeGameFromGameList(game.id.toString());
+                        }
                         break;
                     }
                 }
@@ -150,4 +140,19 @@ public class MatchmakingQueue {
         });
         return completableFuture;
     }
+
+    public void removeGameFromGameList(String gameId) {
+        synchronized (gameList) {
+            Game game = gameList.stream().filter(e -> e.id.toString().equals(gameId)).findFirst().orElse(null);
+            if (game != null) {
+                gameList.remove(game);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return queue.toString();
+    }
+
 }
