@@ -17,6 +17,10 @@ public class FiveInARow {
             new Delta(0, -1),
     };
 
+    protected void setGrid(String[][] grid) {
+        this.grid = grid;
+    }
+
     public FiveInARow() {
         this.grid = new String[X_DEFAULT][Y_DEFAULT];
         for (int i = 0; i < X_DEFAULT; i++) {
@@ -57,21 +61,21 @@ public class FiveInARow {
         return gameOver;
     }
 
-
     private boolean checkWin(String XO, int y, int x, int deltaY, int deltaX) {
-        boolean win = true;
+        int winCounter = 0;
         for (int count = 1; count <= 5; count++) {
             if (isInBounds(y, x)) {
                 String test = grid[y][x];
-                if (test != XO) {
-                    win = false;
+                if (test == XO) {
+                    winCounter++;
+                } else {
                     break;
                 }
             }
             x += deltaX;
             y += deltaY;
         }
-        return win;
+        return winCounter == 5;
     }
 
     public String[][] getGrid() {

@@ -56,6 +56,8 @@ public class GameManager {
         return FiveInARowState.of(this.game);
     }
 
+    public boolean gameIsOver() { return this.game.isGameOver(); }
+
     public String getTurn() {
         return players[turn % 2].getCharacter();
     }

@@ -20,7 +20,6 @@ public class FiveInARowState {
         return new FiveInARowState(fiveInARow);
     }
 
-
     public String getTurn() {
         return turn;
     }
@@ -44,10 +43,6 @@ public class FiveInARowState {
 
     @Override
     public String toString() {
-        return "FiveInARowState{" +
-                "grid=" + Arrays.toString(grid) +
-                ", gameOver=" + gameOver +
-                ", winnerCharacter='" + winnerCharacter + '\'' +
-                '}';
+        return Arrays.deepToString(grid);
     }
 }

@@ -27,4 +27,12 @@ public class MatchmakingObject {
         this.id = id;
         this.gameFound = gameFound;
     }
+
+    @Override
+    public String toString() {
+        return "MatchmakingObject{" +
+                "id='" + id + '\'' +
+                ", gameFound=" + gameFound +
+                '}';
+    }
 }

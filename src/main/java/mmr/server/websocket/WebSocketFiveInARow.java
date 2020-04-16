@@ -67,7 +67,19 @@ public class WebSocketFiveInARow {
 
         GameManager gameManager = gameManagers.get(gameId);
 
-        if (gameManager.nextTurn().getId().equals(playerId)) {
+        if (gameManager.gameIsOver()) {
+            try {
+                sessions.get(gameManager.getPlayers()[0].getId()).close();
+                sessions.get(gameManager.getPlayers()[1].getId()).close();
+                sessions.remove(gameManager.getPlayers()[0].getId());
+                sessions.remove(gameManager.getPlayers()[1].getId());
+                gameManagers.remove(gameId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (gameManager.nextTurn().getId().equals(playerId) && gameManagers.get(gameId) != null) {
             FiveInARowState fiveInARowState = gameManager.place(Arrays.stream(gameManager.getPlayers()).filter(e -> e.getId().equals(playerId)).findFirst().get(), y, x);
             System.out.println(fiveInARowState);
             fiveInARowState.setTurn(gameManagers.get(gameId).getTurn());

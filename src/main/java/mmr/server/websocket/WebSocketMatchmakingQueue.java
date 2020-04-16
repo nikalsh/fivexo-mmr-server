@@ -2,6 +2,7 @@ package mmr.server.websocket;
 
 import mmr.server.model.Game;
 import mmr.server.model.Player;
+import mmr.server.queue.MatchmakingQueue;
 import mmr.server.service.GameService;
 import mmr.server.service.PlayerService;
 import mmr.server.websocket.encoders.ObjectToJson;
@@ -21,6 +22,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,17 +34,13 @@ public class WebSocketMatchmakingQueue {
     PlayerService playerService;
     @Inject
     GameService gameService;
+    @Inject
+    MatchmakingQueue matchmakingQueue;
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
-    Queue<Player> matchmakingQueue = new LinkedList<>();
-//    Map<String, GameManager> games = new ConcurrentHashMap<>();
 
-    private ExecutorService executors;
+    private static final ExecutorService executors = Executors.newFixedThreadPool(50);
 
-    @PostConstruct
-    public void init() {
-         executors = Executors.newFixedThreadPool(100);
-    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) {
@@ -53,7 +51,6 @@ public class WebSocketMatchmakingQueue {
 
     @OnClose
     public void onClose(Session session, @PathParam("id") String id) throws IOException {
-        matchmakingQueue.remove(matchmakingQueue.stream().filter(e -> e.id.equals(id)).findFirst().get());
         sessions.remove(id);
     }
 
@@ -66,49 +63,19 @@ public class WebSocketMatchmakingQueue {
         switch (message) {
             case "queue":
                 executors.execute(() -> {
-                    boolean waiting = true;
-                    boolean alreadyQueued = matchmakingQueue.stream().filter(e -> e.id.toString().equals(id)).findFirst().isPresent();
-//                    boolean alreadyInGame = games.containsKey(id);
-
-                    if (alreadyQueued) {
-                        sendToSession(sessions.get(id), "Already queued for a game");
-                        throw new AlreadyQueuedException("Already queued for a game");
+                    //blocking
+                    MatchmakingObject matchmakingObject = null;
+                    try {
+                        matchmakingObject = matchmakingQueue.addClient(id).get();
+                        System.out.println(matchmakingObject);
+                        sendToSession(sessions.get(id), ObjectToJson.toJson(matchmakingObject));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
                     }
-
-//                    if (alreadyInGame) {
-//                        sendToSession(sessions.get(id), "Already in a game");
-//                        throw new AlreadyInGameException("Already in a game");
-//                    }
-
-                System.out.println(id);
-
-                    matchmakingQueue.add(playerService.findById(id));
-                    sendToSession(sessions.get(id), "Queued for a game");
-                    //waiting for other player
-
-                System.out.println(matchmakingQueue);
-
-                while (waiting) {
-                        if (matchmakingQueue.size() >= 2) {
-                            Player player1 = matchmakingQueue.stream().filter(e -> e.id.toString().equals(id)).findFirst().get();
-                            matchmakingQueue.remove(player1);
-                            Player player2 = matchmakingQueue.poll();
-
-                            Game game = gameService.create(player1.id.toString(), player2.id.toString());
-                            System.out.println(player1);
-                            System.out.println(player2);
-
-                            sendToSession(sessions.get(player1.id.toString()), ObjectToJson.toJson(new MatchmakingObject(game.id.toString(), true)));
-                            sendToSession(sessions.get(player2.id.toString()), ObjectToJson.toJson(new MatchmakingObject(game.id.toString(), true)));
-
-                            waiting = false;
-
-                        }
-                    }
-
                 });
-//                System.out.println(matchmakingQueue);
-
+            break;
         }
 
     }
